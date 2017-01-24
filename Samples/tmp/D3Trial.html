@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+  <div id='example'></div>
+  <script>
+    createsvg();
+
+    function createsvg () {
+      // id:exampleが指定されているタグ(ここではdivタグ)の下に、svgを追加します。
+      // widthとheightを指定します。
+      var svg = d3.select("#example")
+          .append("svg")
+          .attr("width", 640)
+          .attr("height", 480)
+          .style("background-color","#aaa");
+
+      // 座標(cx,cy)と半径(r)を指定し、配列化
+      var c1 = [100, 90, 30];
+      var c2 = [200, 120, 20];
+      var carray = [c1, c2];
+      // 10種類の色を返す関数を使う
+      var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      var grp = svg.selectAll('g')
+        .data(carray)
+        .enter()
+        .append('g')
+        // 座標設定を動的に行う
+        .attr("transform", function(d) {return "translate(" + d[0] + "," + d[1] + ")";});
+
+      grp.append('circle')
+          .attr('r',  function(d) {return d[2];})
+          .attr('fill',  function(d,i) {return color(i);});
+
+      grp.append('text')
+          .attr('text-anchor', "middle")
+          .attr('dy', ".35em")
+          .attr('fill', "white")
+          .text(function(d,i) {return i;})
+
+    }
+  </script>
+</body>
+</html>

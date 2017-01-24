@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+
+        <title>D3 Relation Sample TypeS</title>
+
+        <script type="text/javascript" src="./lib/jquery/jquery-3.1.1.min.js"></script>　　　
+<!--
+        <script type="text/javascript" src="./lib/d3/d3.js"></script>
+        <script type="text/javascript" src="./lib/d3/d3.layout.js"></script>
+        <script type="text/javascript" src="./js/com.js"></script>
+-->
+<!--
+        <link rel="stylesheet" href="./lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="./lib/bootstrap/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="./css/com.css">
+-->
+
+    </head>
+    <body style="height:100%;">
+      <div id="title">
+        <div>相関図サンプル　S</div>
+        <div>D3 ver 2.7.5  古くてむかつくのでボツです</div>
+      </div>
+
+    <!--　グラフ領域定義  -->
+      <div class="graph" style="background-color:#000;width:100%;"></div>
+
+      <script type="text/javascript" src="http://cc0.cc/test/20151107_sazaesan/d3/d3.js"></script>
+      <script type="text/javascript" src="http://cc0.cc/test/20151107_sazaesan/d3/d3.geom.js"></script>
+      <script type="text/javascript" src="http://cc0.cc/test/20151107_sazaesan/d3/d3.layout.js"></script>
+
+      <script type="text/javascript">
+
+        var   w =  $(".graph").width(),        //JQuery
+              h = 600,
+              r = 0;
+
+        var vis = d3.select(".graph")
+            .append("svg:svg")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("pointer-events", "all")
+            .append('svg:g')
+            .call(d3.behavior.zoom().on("zoom", redraw))
+            .append('svg:g');
+
+        vis.append('svg:rect')
+            .attr('width', w)
+            .attr('height', h)
+            .attr('fill', 'rgba(1,1,1,0)')
+
+        function redraw() {
+            vis.attr("transform","translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
+          }
+
+        var force = d3.layout.force()
+            .gravity(.03)
+            .charge(-200)
+            .linkDistance( 150 )
+            .size([w, h]);
+
+        var svg = d3.select(".text").append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+        d3.json("./isono.json", function(json) {
+            var link = vis.selectAll("line")
+                .data(json.links)
+                .enter().append("line")
+                .attr("stroke-opacity", function(d) { if(d.label == 'is a') { return '1.0';} else{ return '1.0'; }; })
+                .attr("stroke-width","5")
+                .style("stroke", function(d) { if(d.color !== null) { return d.color;}; })
+                .on("mouseover", function(){d3.select(this).style("stroke", "#bd6e6e").attr("stroke-opacity", "1.0");})
+                .on("mouseout", function(){d3.select(this).style("stroke", function(d) { if(d.color !== null) { return d.color;}; })
+                    .attr("stroke-opacity", function(d) { if(d.label == 'is a') { return '1.0';} else { return '1.0'; };}) });
+
+            link.append("title")
+                .text(function(d) { return d.label } );
+
+            var node = vis.selectAll("g.node")
+                .data(json.nodes)
+                .enter().append("svg:g")
+                .attr("class","node")
+                .call(force.drag);
+
+                node.append("svg:circle")
+                    .attr("r", function(d) {
+                        if (d.size > 0)
+                            { return 30+(d.size*2.5); }  //直径
+                        else
+                            { return 20; }
+                    } )
+                    .style("fill", function(d) { return "#ccc"; })
+                    .style("stroke", function(d) { if(d.style !== 'filled') { return d.color;}; })
+                    .style("stroke-width", "5")
+                    .on("mouseover", function(){d3.select(this).style("fill", "#fa5c5c");})
+                    .on("mouseout", function(d) {
+                        if (d.style == 'filled') { d3.select(this).style("fill",d.color); }
+                        else {
+                        d3.select(this).style("stroke",d.color);
+                        d3.select(this).style("fill","#ccc");
+                        } } );
+
+                node.append("svg:text")
+                    .attr("text-anchor", "middle")
+                    .attr("fill","black")
+                    .style("pointer-events", "none")
+                    .attr("font-size", function(d) { if (d.color == '#03f') { return 5+(d.size*2) + 'px'; } else { return 5+(d.size*2) + 'px'; } } )
+                    .attr("font-weight", function(d) { if (d.color == '#03f') { return "bold"; } else { return "bold"; } } )
+                    .text( function(d) { return d.id.split("・")[0]; } ).attr("y",-5);
+
+                node.append("svg:text")
+                    .attr("text-anchor", "middle")
+                    .attr("fill","black")
+                    .style("pointer-events", "none")
+                    .attr("font-size", function(d) { if (d.color == '#03f') { return 5+(d.size*2) + 'px'; } else { return 5+(d.size*2) + 'px'; } } )
+                    .attr("font-weight", function(d) { if (d.color == '#03f') { return "bold"; } else { return "bold"; } } )
+                    .text( function(d) { return d.id.split("・")[1]; } ).attr("y",15);
+
+                node.append("title")
+                    .text(function(d) { return d.URI } );
+
+                force
+                    .nodes(json.nodes)
+                    .links(json.links)
+                    .on("tick", tick)
+                    .start();
+
+          function tick() {
+            node.attr("cx", function(d) { return d.x; })
+                .attr("cy", function(d) { return d.y; })
+                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
+
+            link.attr("x1", function(d) { return d.source.x; })
+                .attr("y1", function(d) { return d.source.y; })
+                .attr("x2", function(d) { return d.target.x; })
+                .attr("y2", function(d) { return d.target.y; });
+          }
+        });
+
+      </script>
+    </body>
+</html>

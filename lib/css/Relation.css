@@ -1,0 +1,11 @@
+/*標準的なGraphのデザインを規定 */
+
+.links line {
+//  stroke: #999;             //Relationの色
+  stroke-opacity: 0.6;      //Relarionの不透明度?
+}
+
+.nodes circle {
+  stroke: #fff;           //枠線の色
+  stroke-width: 1.5px;    //枠線の太さ
+}
