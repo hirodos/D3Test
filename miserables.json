@@ -77,9 +77,12 @@
     {"id": "Child2", "group": 9},
     {"id": "Brujon", "group": 4},
     {"id": "Mme.Hucheloup", "group": 8},
-    {"id": "You", "group": 11}
+    {"id": "You", "group": 11},
+    {"id": "Reader1", "group": 12},
+    {"id": "Reader2", "group": 12}
   ],
   "links": [
+    {"source": "Reader1", "target": "Reader2", "value": 2},
     {"source": "Napoleon", "target": "Myriel", "value": 1},
     {"source": "Mlle.Baptistine", "target": "Myriel", "value": 8},
     {"source": "Mme.Magloire", "target": "Myriel", "value": 10},
