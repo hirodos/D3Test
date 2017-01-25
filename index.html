@@ -28,8 +28,6 @@
           RectX = 40,
           RectY = 30,
           r = 20,
-        //Drag&Zoom用
-          transform = d3.zoomIdentity,
         //色
           color = d3.scaleOrdinal(d3.schemeCategory20b),        //色見本は　https://github.com/d3/d3-scale/blob/master/README.md#schemeCategory20
           LineCol = d3.scaleSequential(d3.interpolateBlues);    //色見本は　https://github.com/d3/d3-scale-chromatic
@@ -48,6 +46,7 @@
       var svg = vis.append('g')
           .call(d3.drag()
               .on('drag',svgDragged))
+
 
       var simulation = d3.forceSimulation()
             .velocityDecay(0.3)                                                     //摩擦
@@ -141,7 +140,10 @@
           .style('pointer-events', 'none')
           .attr('font-size', function(d) {return '10px'; }  )
         //  .attr('font-weight', function(d) { return 'bold'; }  )
-          .text(function(d) { return d.id; })
+          .text(function(d) { return d.id; });
+
+        node.append("title")
+          .text(function(d) { return d.id; });
 
         simulation
             .nodes(graph.nodes)

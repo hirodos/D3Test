@@ -13,7 +13,7 @@
 }
 
 </style>
-<svg width="960" height="600"></svg>
+<svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
@@ -31,14 +31,32 @@ var simulation = d3.forceSimulation()
 d3.json("miserables.json", function(error, graph) {
   if (error) throw error;
 
-  var link = svg.append("g")
+//"svg"にZoomイベントを設定
+svg.call(d3.zoom()
+    .scaleExtent([1/4,4])
+    .on('zoom', SVGzoomed));
+
+//"svg"上に"g"をappendしてdragイベントを設定
+var g = svg.append("g")
+    .call(d3.drag()
+    .on('drag',SVGdragged))
+
+function SVGzoomed() {
+  g.attr("transform", d3.event.transform);
+}
+
+function SVGdragged(d) {
+    d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
+      };
+
+  var link = g.append("g")  //svg⇒gに
       .attr("class", "links")
     .selectAll("line")
     .data(graph.links)
     .enter().append("line")
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
-  var node = svg.append("g")
+  var node = g.append("g")  //svg⇒gに
       .attr("class", "nodes")
     .selectAll("circle")
     .data(graph.nodes)
@@ -49,15 +67,6 @@ d3.json("miserables.json", function(error, graph) {
           .on("start", dragstarted)
           .on("drag", dragged)
           .on("end", dragended));
-
-//node textの定義
-  node.append('text')
-    .attr('text-anchor', 'middle')
-    .attr('fill', 'white')
-    .style('pointer-events', 'none')
-    .attr('font-size', function(d) {return '10px'; }  )
-    .text(function(d) { return d.id; })
-
 
   node.append("title")
       .text(function(d) { return d.id; });

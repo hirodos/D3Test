@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+</style>
+<svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+var simulation = d3.forceSimulation()
+      .velocityDecay(0.4)                                                     //摩擦
+    .force('charge', d3.forceManyBody())                                      //詳細設定は後で
+    .force('link', d3.forceLink().id(function(d) { return d.id; }), 0.1)      //詳細設定は後で
+    .force('colllision',d3.forceCollide(40))                               //nodeの衝突半径：Nodeの最大値と同じ
+    .force('positioningX',d3.forceX())                                        //詳細設定は後で
+    .force('positioningY',d3.forceY())                                        //詳細設定は後で
+    .force('center', d3.forceCenter(width / 2, height / 2));                  //重力の中心
+
+d3.json("miserables.json", function(error, graph) {
+  if (error) throw error;
+
+//"svg"にZoomイベントを設定
+svg.call(d3.zoom()
+    .scaleExtent([1/4,4])
+    .on('zoom', SVGzoomed));
+
+//"svg"上に"g"をappendしてdragイベントを設定
+var g = svg.append("g")
+    .call(d3.drag()
+    .on('drag',SVGdragged))
+
+function SVGzoomed() {
+  g.attr("transform", d3.event.transform);
+}
+
+function SVGdragged(d) {
+    d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
+      };
+
+  var link = g.append("g")  //svg⇒gに
+      .attr("class", "links")
+    .selectAll("line")
+    .data(graph.links)
+    .enter().append("line")
+      .attr("stroke-width", function(d) { return d.value })  //valueの値をそのまま使用
+      .call(d3.drag()　              //無いとエラーになる。。
+          .on('start', dragstarted)
+          .on('drag', dragged)
+          .on('end', dragended));
+
+// nodeの定義
+  var node = g.append('g')
+      .attr('class', 'nodes')
+    .selectAll('g')
+    .data(graph.nodes)
+    .enter()
+    .append('g')
+    .call(d3.drag()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended));
+
+// node circleの定義
+  node.append('circle')
+    .attr('r', 20)   //5⇒20
+    .attr('stroke', '#ccc')
+    .attr('fill', function(d) { return color(d.group); })
+    .style('stroke-width', '2');  //線の太さ
+
+//node textの定義
+  node.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'black')
+    .style('pointer-events', 'none')
+    .attr('font-size', function(d) {return '10px'; }  )
+    .attr('font-weight', function(d) { return 'bold'; }  )
+    .text(function(d) { return d.id; });
+
+
+  node.append("title")
+      .text(function(d) { return d.id; });
+
+  simulation
+      .nodes(graph.nodes)
+      .on("tick", ticked);
+
+  simulation.force("link")
+      .distance(200) //Link長
+      .links(graph.links);
+
+  simulation.force('charge')
+      .strength(function(d) {return -300})              //node間の力
+
+  simulation.force('positioningX')                      //X方向の中心に向けた引力
+      .strength(0.04)
+
+  simulation.force('positioningY')                      //Y方向の中心に向けた引力
+      .strength(0.04)
+
+
+  function ticked() {
+    link
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; })
+        .attr('transform', function(d) {return 'translate(' + d.x + ',' + d.y + ')'}) //nodesの要素が連動して動くように設定
+  }
+});
+
+function dragstarted(d) {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+function dragged(d) {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+function dragended(d) {
+  if (!d3.event.active) simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
+
+</script>
