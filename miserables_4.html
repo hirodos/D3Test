@@ -62,10 +62,12 @@ function SVGdragged(d) {
     .enter().append("line")
       .attr("stroke","#999")  //輪郭線の色指定追加
       .attr("stroke-width", function(d) { return d.value })  //valueの値をそのまま使用
-      .call(d3.drag()　              //無いとエラーになる。。
-          .on('start', dragstarted)
-          .on('drag', dragged)
-          .on('end', dragended));
+    .on('mouseover', function(){d3.select(this).style('stroke', 'red');}) //カーソルが合ったら赤に
+    .on('mouseout', function(){d3.select(this).style('stroke', "#999");}) //カーソルが外れたら元の色に
+    .call(d3.drag()　              //無いとエラーになる。。
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended));
 
 // nodeの定義
   var node = g.append('g')
@@ -87,6 +89,8 @@ function SVGdragged(d) {
     .attr('visibility',function(d){ return Chk_shape(d,"circle")})
     .style('stroke-width', '2')  //線の太さ
     .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
+    .on('mouseover', function(){d3.select(this).style('fill', 'red')})  //カーソルが合ったら赤に
+    .on('mouseout', function(){d3.select(this).style('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
 
 // node Rectの定義
   node.append('rect')
@@ -101,6 +105,8 @@ function SVGdragged(d) {
     .attr('visibility',function(d){ return Chk_shape(d,"rect")})
     .style('stroke-width', '2')
     .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
+    .on('mouseover', function(){d3.select(this).style('fill', 'red')})  //カーソルが合ったら赤に
+    .on('mouseout', function(){d3.select(this).style('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
 
 // node ellipseの定義
   node.append('ellipse')
@@ -111,6 +117,8 @@ function SVGdragged(d) {
     .attr('visibility',function(d){ return Chk_shape(d,"ellipse")})
     .style('stroke-width', '2')
     .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
+    .on('mouseover', function(){d3.select(this).style('fill', 'red')})  //カーソルが合ったら赤に
+    .on('mouseout', function(){d3.select(this).style('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
 
 // node hexagonの定義
   node.append('polygon')
@@ -120,6 +128,8 @@ function SVGdragged(d) {
     .attr('visibility',function(d){ return Chk_shape(d,"hexagon")})
     .style('stroke-width', '2')
     .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
+    .on('mouseover', function(){d3.select(this).style('fill', 'red')})  //カーソルが合ったら赤に
+    .on('mouseout', function(){d3.select(this).style('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
 
 
 //node textの定義
@@ -130,7 +140,6 @@ function SVGdragged(d) {
     .attr('font-size', function(d) {return '10px'; }  )
     .attr('font-weight', function(d) { return 'bold'; }  )
     .text(function(d) { return d.id; });
-
 
   node.append("title")
       .text(function(d) { return d.id; });
