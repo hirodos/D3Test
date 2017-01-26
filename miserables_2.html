@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<!--
 <style>
 
 .links line {
@@ -13,6 +14,8 @@
 }
 
 </style>
+-->
+
 <svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
@@ -58,6 +61,7 @@ function SVGdragged(d) {
     .selectAll("line")
     .data(graph.links)
     .enter().append("line")
+      .attr("stroke","#999")  //輪郭線の色指定追加    
       .attr("stroke-width", function(d) { return d.value })  //valueの値をそのまま使用
       .call(d3.drag()　              //無いとエラーになる。。
           .on('start', dragstarted)
