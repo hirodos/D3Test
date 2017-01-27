@@ -55,31 +55,33 @@ function SVGdragged(d) {
     d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
       };
 
-  var marker =g.append("defs").append("marker")
-      .attr('id', "mk1")
-      .attr('refX', 2.5)
-      .attr('refY', 2.5)
-      .attr('markerUnits','stroke-width')
-        .attr('viewbox', "0 0 5 5")
-        .attr('orient', "auto-start-reverse")
+//矢印の定義
+  svg.append("defs").append("marker")
+      .attr("id", "suit")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 0)
+      .attr("refY", 0)
+      .attr("markerWidth", 2)
+      .attr("markerHeight", 2)
+      .attr("fill", "#999")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5");
 
-  marker.append("polygon")
-      .attr("points","0,0 0,5 5,2.5")
-
+//linkの定義
   var link = g.append("g")  //svg⇒gに
-      .attr("class", "links")
-    .selectAll("line")
+    .attr("class", "links")
+    .selectAll("path")
     .data(graph.links)
-    .enter().append("line")
-      .attr("stroke","#999")  //輪郭線の色指定追加
-      .attr("stroke-width", function(d) { return d.value })  //valueの値をそのまま使用
-      .attr("marker-start","url(#mk1)")
-      .attr("marker-end","url(#mk1)")
-    .on('mouseover', function(){
-      d3.select(this).style('stroke', 'red');
-      }) //カーソルが合ったら赤に
+    .enter().append("path")
+    .attr("stroke","#999")  //輪郭線の色指定追加
+    .attr("stroke-width", function(d) { return d.value })  //valueの値をそのまま使用
+    .attr("marker-end","url(#suit)")
+    .attr("fill","none")
+    .attr("stroke-dasharray","0 40,40" )
+    .on('mouseover', function(){d3.select(this).style('stroke', 'red');}) //カーソルが合ったら赤に
     .on('mouseout', function(){d3.select(this).style('stroke', "#999");}) //カーソルが外れたら元の色に
-    .call(d3.drag()　              //無いとエラーになる。。
+    .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
         .on('end', dragended));
@@ -209,11 +211,13 @@ function SVGdragged(d) {
 
   function ticked() {
     link
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
-
+      .attr("d",function(d){ return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y; })
+/*
+        .attr("x1", function(d) { return d.source.x ; })
+        .attr("y1", function(d) { return d.source.y ; })
+        .attr("x2", function(d) { return d.target.x ; })
+        .attr("y2", function(d) { return d.target.y ; });
+*/
     node
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; })
