@@ -28,8 +28,8 @@ var color = d3.scaleOrdinal(d3.schemeCategory20);
 var simulation = d3.forceSimulation()
       .velocityDecay(0.4)                                                     //摩擦
     .force('charge', d3.forceManyBody())                                      //詳細設定は後で
-    .force('link', d3.forceLink().id(function(d) { return d.id; }), 0.1)      //詳細設定は後で
-    .force('colllision',d3.forceCollide(40))                               //nodeの衝突半径：Nodeの最大値と同じ
+    .force('link', d3.forceLink().id(function(d) { return d.id; }))          //詳細設定は後で
+    .force('colllision',d3.forceCollide(40))                                 //nodeの衝突半径：Nodeの最大値と同じ
     .force('positioningX',d3.forceX())                                        //詳細設定は後で
     .force('positioningY',d3.forceY())                                        //詳細設定は後で
     .force('center', d3.forceCenter(width / 2, height / 2));                  //重力の中心
@@ -61,7 +61,7 @@ function SVGdragged(d) {
     .data(graph.links)
     .enter().append("line")
       .attr("stroke","#999")  //輪郭線の色指定追加
-      .attr("stroke-width", function(d) { return d.value })  //valueの値をそのまま使用
+      .attr("stroke-width", function(d) { return Math.sqrt(d.value); })
       .call(d3.drag()　              //無いとエラーになる。。
           .on('start', dragstarted)
           .on('drag', dragged)
