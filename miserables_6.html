@@ -55,19 +55,46 @@ function SVGdragged(d) {
     d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
       };
 
-  var link = g.append("g")  //svg⇒gに
+//Linksの定義
+  var links = g.append("g")  //svg⇒gに
       .attr("class", "links")
-    .selectAll("line")
+    .selectAll("g")
     .data(graph.links)
-    .enter().append("line")
+    .enter()
+    .append("g")
+      .attr("class", "linkArrow")
+      .attr("fill", "#999")
       .attr("stroke","#999")  //輪郭線の色指定追加
+      .on('mouseover', function(){d3.select(this).attr('stroke', 'red')
+                                  d3.select(this).attr('fill', 'red')
+                                  ;}) //カーソルが合ったら赤に
+      .on('mouseout', function(){d3.select(this).attr('stroke', "#999")
+                                 d3.select(this).attr('fill', "#999")
+                                  ;}) //カーソルが外れたら元の色に
+      .call(d3.drag()　              //無いとエラーになる。。
+          .on('start', dragstarted)
+          .on('drag', dragged)
+          .on('end', dragended));
+
+  links.append("marker")
+      .attr("id", function(d) { return "mkr" + d.source+d.target })
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 0)
+      .attr("refY", 0)
+      .attr("markerWidth", 5)
+      .attr("markerHeight", 5)
+      .attr("orient", "auto-start-reverse")
+      .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+
+//linkの定義
+  var link = links.append("path")    //line⇒Path
+//      .attr("stroke","#999")  //輪郭線の色指定追加
+      .attr("marker-start",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
+      .attr("marker-mid",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
+      .attr("marker-end",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
+      .attr("fill","none")    //塗りつぶしなしを追加
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); })
-    .on('mouseover', function(){d3.select(this).attr('stroke', 'red');}) //カーソルが合ったら赤に
-    .on('mouseout', function(){d3.select(this).attr('stroke', "#999");}) //カーソルが外れたら元の色に
-    .call(d3.drag()　              //無いとエラーになる。。
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended));
 
 // nodeの定義
   var node = g.append('g')
@@ -128,7 +155,7 @@ function SVGdragged(d) {
     .attr('visibility',function(d){ return Chk_shape(d,"hexagon")})
     .style('stroke-width', '2')
     .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-    .on('mouseover', function(){d3.select(this).atrr('fill', 'red')})  //カーソルが合ったら赤に
+    .on('mouseover', function(){d3.select(this).attr('fill', 'red')})  //カーソルが合ったら赤に
     .on('mouseout', function(){d3.select(this).attr('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
 
 
@@ -194,11 +221,13 @@ function SVGdragged(d) {
 
   function ticked() {
     link
+        .attr("d", linkArc);
+/*
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
-
+*/
     node
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; })
@@ -206,7 +235,12 @@ function SVGdragged(d) {
   }
 });
 
-
+function linkArc(d) {
+  var dx = d.target.x - d.source.x,
+      dy = d.target.y - d.source.y,
+      dr = Math.sqrt(dx * dx + dy * dy);
+  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+}
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
