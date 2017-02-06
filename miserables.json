@@ -83,6 +83,7 @@
   ],
   "links": [
     {"source": "Reader1", "target": "Reader2", "value": 2},
+    {"source": "Reader2", "target": "Reader1", "value": 2},
     {"source": "Napoleon", "target": "Myriel", "value": 1},
     {"source": "Mlle.Baptistine", "target": "Myriel", "value": 8},
     {"source": "Mme.Magloire", "target": "Myriel", "value": 10},

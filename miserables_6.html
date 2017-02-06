@@ -29,7 +29,7 @@ var simulation = d3.forceSimulation()
       .velocityDecay(0.4)                                                     //摩擦
     .force('charge', d3.forceManyBody())                                      //詳細設定は後で
     .force('link', d3.forceLink().id(function(d) { return d.id; }))          //詳細設定は後で
-    .force('colllision',d3.forceCollide(40))                                 //nodeの衝突半径：Nodeの最大値と同じ
+    .force('colllision',d3.forceCollide(40))                                 //nodeの衝突半径：Nodeの最大値と同じとする
     .force('positioningX',d3.forceX())                                        //詳細設定は後で
     .force('positioningY',d3.forceY())                                        //詳細設定は後で
     .force('center', d3.forceCenter(width / 2, height / 2));                  //重力の中心
@@ -76,16 +76,19 @@ function SVGdragged(d) {
           .on('drag', dragged)
           .on('end', dragended));
 
-  links.append("marker")
+//Markerの定義
+  var marker = links.append("marker")
       .attr("id", function(d) { return "mkr" + d.source+d.target })
-      .attr("viewBox", "0 -5 10 10")
+      .attr("viewBox", "0 -15 30 15")
       .attr("refX", 0)
       .attr("refY", 0)
-      .attr("markerWidth", 5)
-      .attr("markerHeight", 5)
+      .attr("markerWidth", 20)
+      .attr("markerHeight", 20)
       .attr("orient", "auto-start-reverse")
       .append("path")
-        .attr("d", "M0,-5L10,0L0,5")
+        .attr("d", "M1,-5L11,0L1,5z")
+        .attr("fill","#ddd")          //背景色と同じ
+        .attr("stroke-width", 1)
 
 //linkの定義
   var link = links.append("path")    //line⇒Path
@@ -152,7 +155,7 @@ function SVGdragged(d) {
     .attr('points', "0,20 17.3,10 17.3,-10 0,-20 -17.3,-10 -17.3,10")
     .attr('stroke', '#ccc')
     .attr('fill', function(d) { return color(d.group); })
-    .attr('visibility',function(d){ return Chk_shape(d,"hexagon")})
+    .attr('visibility',function(d){ return Chk_shape(d,"hexagon-")})
     .style('stroke-width', '2')
     .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
     .on('mouseover', function(){d3.select(this).attr('fill', 'red')})  //カーソルが合ったら赤に
@@ -220,8 +223,13 @@ function SVGdragged(d) {
     }
 
   function ticked() {
+    marker
+        .attr("refX",markerRefX)
+        .attr("refY",markerRefY)
+
     link
-        .attr("d", linkArc);
+        .attr("d", linkArc)
+        .attr("stroke-dasharray",linkdasharr)
 /*
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
@@ -235,12 +243,31 @@ function SVGdragged(d) {
   }
 });
 
+function markerRefX(d){
+  return 0;
+}
+
+function markerRefY(d){
+  return 0;
+}
+
 function linkArc(d) {
   var dx = d.target.x - d.source.x,
       dy = d.target.y - d.source.y,
       dr = Math.sqrt(dx * dx + dy * dy);
   return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
 }
+
+function linkdasharr(d){
+  var dx = d.target.x - d.source.x,
+      dy = d.target.y - d.source.y,
+      dr = Math.sqrt(dx * dx + dy * dy)
+      arrH  =  10 *Math.sqrt(d.value) + 0.5 * Math.sqrt(3),     //矢印の高さ
+      arc = 0.5 * Math.PI * dr - 2 * arrH     //弧の長さ （弧はlinkArcで定義）
+//      d.target.  　
+  return  "0 " + arrH + " " +  arc + " " + arrH
+}
+
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
