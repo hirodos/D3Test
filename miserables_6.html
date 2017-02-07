@@ -79,16 +79,15 @@ function SVGdragged(d) {
 //Markerの定義
   var marker = links.append("marker")
       .attr("id", function(d) { return "mkr" + d.source+d.target })
-      .attr("viewBox", "0 -15 30 15")
-      .attr("refX", 0)
-      .attr("refY", 0)
-      .attr("markerWidth", 20)
-      .attr("markerHeight", 20)
+      .attr("viewBox", "0 0 20 20")
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
       .attr("orient", "auto-start-reverse")
-      .append("path")
-        .attr("d", "M1,-5L11,0L1,5z")
-        .attr("fill","#ddd")          //背景色と同じ
-        .attr("stroke-width", 1)
+
+  marker.append("path")
+      .attr("d", "M0.5,0.75L18.88,10L0.5,19.25z")
+      .attr("fill","none")//"#ddd")          //背景色と同じ
+      .attr("stroke-width", 1)
 
 //linkの定義
   var link = links.append("path")    //line⇒Path
@@ -98,6 +97,7 @@ function SVGdragged(d) {
       .attr("marker-end",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
       .attr("fill","none")    //塗りつぶしなしを追加
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); })
+      .attr("stroke-dashoffset", 0)
 
 // nodeの定義
   var node = g.append('g')
@@ -244,11 +244,15 @@ function SVGdragged(d) {
 });
 
 function markerRefX(d){
-  return 0;
+  var dx = d.target.x - d.source.x,
+      dy = d.target.y - d.source.y,
+      dr = Math.sqrt(dx * dx + dy * dy)
+      arrH  =  10 *Math.sqrt(d.value) + 0.5 * Math.sqrt(5)     //矢印の高さ
+  return arrH;
 }
 
 function markerRefY(d){
-  return 0;
+  return 10;
 }
 
 function linkArc(d) {
@@ -261,9 +265,9 @@ function linkArc(d) {
 function linkdasharr(d){
   var dx = d.target.x - d.source.x,
       dy = d.target.y - d.source.y,
-      dr = Math.sqrt(dx * dx + dy * dy)
-      arrH  =  10 *Math.sqrt(d.value) + 0.5 * Math.sqrt(3),     //矢印の高さ
-      arc = 0.5 * Math.PI * dr - 2 * arrH     //弧の長さ （弧はlinkArcで定義）
+      dr = Math.sqrt(dx * dx + dy * dy),
+      arrH  =  10 *Math.sqrt(d.value) + 0.5 * Math.sqrt(5),     //矢印の高さ
+      arc = (0.5 * Math.PI * dr) - (2 * arrH)     //弧の長さ （弧はlinkArcで定義）
 //      d.target.  　
   return  "0 " + arrH + " " +  arc + " " + arrH
 }
