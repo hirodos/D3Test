@@ -34,6 +34,33 @@ var simulation = d3.forceSimulation()
     .force('positioningY',d3.forceY())                                        //詳細設定は後で
     .force('center', d3.forceCenter(width / 2, height / 2));                  //重力の中心
 
+//使用するnode図形計上形状定義
+var Defs = svg.append("defs")
+//Circle
+Defs.append('circle')
+    .attr("id","circle")
+    .attr('r', 20)   //5⇒20
+//Rect
+Defs.append('rect')
+  .attr("id","rect")
+  .attr('width', 40)
+  .attr('height', 30)
+  .attr('rx', 7)  //角を丸める
+  .attr('ry', 7)  //角を丸める
+  .attr('x', -(40/2))  //circleと中心を合わせる
+  .attr('y', -(30/2))  //circleと中心を合わせる
+
+//Ellipse
+Defs.append('ellipse')
+  .attr("id","ellipse")
+  .attr('rx', 30)
+  .attr('ry', 20)
+
+// hexagon
+Defs.append('polygon')
+    .attr("id","hexagon")
+    .attr('points', "0,20 17.3,10 17.3,-10 0,-20 -17.3,-10 -17.3,10")
+
 d3.json("miserables.json", function(error, graph) {
   if (error) throw error;
 
@@ -79,48 +106,22 @@ function SVGdragged(d) {
         .on('drag', dragged)
         .on('end', dragended));
 
+/*
 // node circleの定義
   node.append('circle')
     .attr('r', 20)   //5⇒20
     .attr('stroke', '#ccc')
     .attr('fill', function(d) { return color(d.group); })
-    .attr('visibility',function(d){ return Chk_shape(d,"circle")})
+    .style('stroke-width', '2');  //線の太さ
+*/
+
+// node 図形の定義
+  node.append("use")
+    .attr("xlink:href",function(d) {return "#"+ nodeTypeID(d.group)})        //図形判定
+    .attr('stroke', '#ccc')
+    .attr('fill', function(d) { return color(d.group); })
     .style('stroke-width', '2')  //線の太さ
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-
-// node Rectの定義
-  node.append('rect')
-    .attr('width', 40)
-    .attr('height', 30)
-    .attr('rx', 7)  //角を丸める
-    .attr('ry', 7)  //角を丸める
-    .attr('stroke', '#ccc')
-    .attr('fill', function(d) { return color(d.group); })
-    .attr('x', -(40/2))  //circleと中心を合わせる
-    .attr('y', -(30/2))  //circleと中心を合わせる
-    .attr('visibility',function(d){ return Chk_shape(d,"rect")})
-    .style('stroke-width', '2')
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-
-// node ellipseの定義
-  node.append('ellipse')
-    .attr('rx', 30)
-    .attr('ry', 20)
-    .attr('stroke', '#ccc')
-    .attr('fill', function(d) { return color(d.group); })
-    .attr('visibility',function(d){ return Chk_shape(d,"ellipse")})
-    .style('stroke-width', '2')
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-
-// node hexagonの定義
-  node.append('polygon')
-    .attr('points', "0,20 17.3,10 17.3,-10 0,-20 -17.3,-10 -17.3,10")
-    .attr('stroke', '#ccc')
-    .attr('fill', function(d) { return color(d.group); })
-    .attr('visibility',function(d){ return Chk_shape(d,"hexagon")})
-    .style('stroke-width', '2')
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-
+    .style('stroke-dasharray',function(d){return stroke_dasharrayCD(d)})  //破線判定
 
 //node textの定義
   node.append('text')
@@ -153,7 +154,7 @@ function SVGdragged(d) {
       .strength(0.04)
 
 //破線判定
-  function Chk_stroke_dasharray(d){
+  function stroke_dasharrayCD(d){
       var arr = [2,4,6,7,9,10,11,12,0]
       if (arr.indexOf(d.group) >= 0) {
         return "3 2"  //3:2の破線
@@ -163,24 +164,29 @@ function SVGdragged(d) {
       }
   }
 
-  //形状判定
-    function Chk_shape(d,shape){
-        var arrRect = [3,4]
-        var arrEllipse = [5,6,7]
-        var arrHexagon = [9,10,11,12,0]
+  //図形判定
+    function nodeTypeID(d){
+      var nodetype
+      var arrRect = [3,4]
+      var arrEllipse = [5,6,7]
+      var arrHexagon = [9,10,11,12,0]
 
-        if(arrRect.indexOf(d.group) >= 0){
-          if (shape == "rect")     {return 'visible'} else {return 'hidden'}
-        }
-        else if(arrEllipse.indexOf(d.group) >= 0){
-          if (shape == "ellipse")  {return 'visible'} else {return 'hidden'}
-        }
-        else if(arrHexagon.indexOf(d.group) >= 0){
-          if (shape == "hexagon")  {return 'visible'} else {return 'hidden'}
-        }
-        else{
-          if (shape == "circle")   {return 'visible'} else {return 'hidden'}
-        }
+      if(arrRect.indexOf(d) >= 0){
+        //Rect
+        return "rect"
+      }
+      else if(arrEllipse.indexOf(d) >= 0){
+        //Ellipse
+        return "ellipse"
+      }
+      else if(arrHexagon.indexOf(d) >= 0){
+        //Hexagon
+        return "hexagon"
+      }
+      else{
+        //Circle
+        return "circle"
+      }
     }
 
   function ticked() {

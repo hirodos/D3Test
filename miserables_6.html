@@ -34,26 +34,75 @@ var simulation = d3.forceSimulation()
     .force('positioningY',d3.forceY())                                        //詳細設定は後で
     .force('center', d3.forceCenter(width / 2, height / 2));                  //重力の中心
 
+//使用するnode図形計上形状定義(中心座標は(0,0))
+var Defs = svg.append("defs")
+//Circle
+var icon1 = Defs.append('circle')
+      .attr("id","circle")
+      .attr('r', 20),   //5⇒20
+    icon1len = icon1.node().getTotalLength(),
+    icon1str = icon1.node().getPointAtLength(0);
+//Rect
+var icon2 = Defs.append('rect')
+      .attr("id","rect")
+      .attr('width', 40)
+      .attr('height', 30)
+      .attr('rx', 7)  //角を丸める
+      .attr('ry', 7)  //角を丸める
+      .attr('x', -(40/2))  //circleと中心を合わせる
+      .attr('y', -(30/2)),  //circleと中心を合わせる
+    icon2len = icon2.node().getTotalLength(),
+    icon2str = icon2.node().getPointAtLength(0);
+
+//Ellipse
+var icon3 = Defs.append('ellipse')
+      .attr("id","ellipse")
+      .attr('rx', 30)
+      .attr('ry', 20),
+    icon3len = icon3.node().getTotalLength(),
+    icon3str = icon3.node().getPointAtLength(0);
+
+// hexagon
+var icon4 = Defs.append('polygon')
+      .attr("id","hexagon")
+      .attr('points', "0,20 17.3,10 17.3,-10 0,-20 -17.3,-10 -17.3,10"),
+    icon4len = icon4.node().getTotalLength(),
+    icon4str = icon4.node().getPointAtLength(0);
+
+//Debug用Memo領域
+//---------------------------------------
+var memo = svg.append('text')
+  .attr('text-anchor', 'left')
+  .attr("x",10)
+  .attr("y",30)
+  .attr('fill', 'black')
+  .attr('font-size', function(d) {return '15px'; }  )
+  .attr('font-weight', function(d) { return 'bold'; }  )
+  .text(function(d) {
+    return icon4len +"/ "+icon4str.x + ", " + icon4str.y;
+  })
+//---------------------------------------
+
 d3.json("miserables.json", function(error, graph) {
   if (error) throw error;
 
 //"svg"にZoomイベントを設定
-svg.call(d3.zoom()
-    .scaleExtent([1/4,4])
-    .on('zoom', SVGzoomed));
+  svg.call(d3.zoom()
+      .scaleExtent([1/4,4])
+      .on('zoom', SVGzoomed));
 
 //"svg"上に"g"をappendしてdragイベントを設定
-var g = svg.append("g")
-    .call(d3.drag()
-    .on('drag',SVGdragged))
+  var g = svg.append("g")
+      .call(d3.drag()
+      .on('drag',SVGdragged))
 
-function SVGzoomed() {
-  g.attr("transform", d3.event.transform);
-}
+  function SVGzoomed() {
+    g.attr("transform", d3.event.transform);
+  }
 
-function SVGdragged(d) {
-    d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
-      };
+  function SVGdragged(d) {
+      d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
+        };
 
 //Linksの定義
   var links = g.append("g")  //svg⇒gに
@@ -82,6 +131,8 @@ function SVGdragged(d) {
       .attr("viewBox", "0 0 20 20")
       .attr("markerWidth", 10)
       .attr("markerHeight", 10)
+      .attr("refX", 0)
+      .attr("refY", 10)
       .attr("orient", "auto-start-reverse")
 
   marker.append("path")
@@ -111,56 +162,15 @@ function SVGdragged(d) {
         .on('drag', dragged)
         .on('end', dragended));
 
-// node circleの定義
-  node.append('circle')
-    .attr('r', 20)   //5⇒20
+// node 図形の定義
+  node.append("use")
+    .attr("xlink:href",function(d) {return "#"+ nodeTypeID(d.group)})        //図形判定
     .attr('stroke', '#ccc')
     .attr('fill', function(d) { return color(d.group); })
-    .attr('visibility',function(d){ return Chk_shape(d,"circle")})
     .style('stroke-width', '2')  //線の太さ
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
+    .style('stroke-dasharray',function(d){return stroke_dasharrayCD(d)})  //破線判定
     .on('mouseover', function(){d3.select(this).attr('fill', 'red')})  //カーソルが合ったら赤に
     .on('mouseout', function(){d3.select(this).attr('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
-
-// node Rectの定義
-  node.append('rect')
-    .attr('width', 40)
-    .attr('height', 30)
-    .attr('rx', 7)  //角を丸める
-    .attr('ry', 7)  //角を丸める
-    .attr('stroke', '#ccc')
-    .attr('fill', function(d) { return color(d.group); })
-    .attr('x', -(40/2))  //circleと中心を合わせる
-    .attr('y', -(30/2))  //circleと中心を合わせる
-    .attr('visibility',function(d){ return Chk_shape(d,"rect")})
-    .style('stroke-width', '2')
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-    .on('mouseover', function(){d3.select(this).attr('fill', 'red')})  //カーソルが合ったら赤に
-    .on('mouseout', function(){d3.select(this).attr('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
-
-// node ellipseの定義
-  node.append('ellipse')
-    .attr('rx', 30)
-    .attr('ry', 20)
-    .attr('stroke', '#ccc')
-    .attr('fill', function(d) { return color(d.group); })
-    .attr('visibility',function(d){ return Chk_shape(d,"ellipse")})
-    .style('stroke-width', '2')
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-    .on('mouseover', function(){d3.select(this).attr('fill', 'red')})  //カーソルが合ったら赤に
-    .on('mouseout', function(){d3.select(this).attr('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
-
-// node hexagonの定義
-  node.append('polygon')
-    .attr('points', "0,20 17.3,10 17.3,-10 0,-20 -17.3,-10 -17.3,10")
-    .attr('stroke', '#ccc')
-    .attr('fill', function(d) { return color(d.group); })
-    .attr('visibility',function(d){ return Chk_shape(d,"hexagon-")})
-    .style('stroke-width', '2')
-    .style('stroke-dasharray',function(d){return Chk_stroke_dasharray(d)})
-    .on('mouseover', function(){d3.select(this).attr('fill', 'red')})  //カーソルが合ったら赤に
-    .on('mouseout', function(){d3.select(this).attr('fill', function(d) { return color(d.group); })}) //カーソルが外れたら元の色に
-
 
 //node textの定義
   node.append('text')
@@ -192,7 +202,7 @@ function SVGdragged(d) {
       .strength(0.04)
 
 //破線判定
-  function Chk_stroke_dasharray(d){
+  function stroke_dasharrayCD(d){
       var arr = [2,4,6,7,9,10,11,12,0]
       if (arr.indexOf(d.group) >= 0) {
         return "3 2"  //3:2の破線
@@ -202,34 +212,36 @@ function SVGdragged(d) {
       }
   }
 
-  //形状判定
-    function Chk_shape(d,shape){
-        var arrRect = [3,4]
-        var arrEllipse = [5,6,7]
-        var arrHexagon = [9,10,11,12,0]
+//図形判定
+  function nodeTypeID(d){
+    var nodetype
+    var arrRect = [3,4]
+    var arrEllipse = [5,6,7]
+    var arrHexagon = [9,10,11,12,0]
 
-        if(arrRect.indexOf(d.group) >= 0){
-          if (shape == "rect")     {return 'visible'} else {return 'hidden'}
-        }
-        else if(arrEllipse.indexOf(d.group) >= 0){
-          if (shape == "ellipse")  {return 'visible'} else {return 'hidden'}
-        }
-        else if(arrHexagon.indexOf(d.group) >= 0){
-          if (shape == "hexagon")  {return 'visible'} else {return 'hidden'}
-        }
-        else{
-          if (shape == "circle")   {return 'visible'} else {return 'hidden'}
-        }
+    if(arrRect.indexOf(d) >= 0){
+      //Rect
+      return "rect"
     }
+    else if(arrEllipse.indexOf(d) >= 0){
+      //Ellipse
+      return "ellipse"
+    }
+    else if(arrHexagon.indexOf(d) >= 0){
+      //Hexagon
+      return "hexagon"
+    }
+    else{
+      //Circle
+      return "circle"
+    }
+  }
 
   function ticked() {
-    marker
-        .attr("refX",markerRefX)
-        .attr("refY",markerRefY)
 
     link
         .attr("d", linkArc)
-        .attr("stroke-dasharray",linkdasharr)
+
 /*
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
@@ -243,18 +255,6 @@ function SVGdragged(d) {
   }
 });
 
-function markerRefX(d){
-  var dx = d.target.x - d.source.x,
-      dy = d.target.y - d.source.y,
-      dr = Math.sqrt(dx * dx + dy * dy)
-      arrH  =  10 *Math.sqrt(d.value) + 0.5 * Math.sqrt(5)     //矢印の高さ
-  return arrH;
-}
-
-function markerRefY(d){
-  return 10;
-}
-
 function linkArc(d) {
   var dx = d.target.x - d.source.x,
       dy = d.target.y - d.source.y,
@@ -262,16 +262,10 @@ function linkArc(d) {
   return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
 }
 
-function linkdasharr(d){
-  var dx = d.target.x - d.source.x,
-      dy = d.target.y - d.source.y,
-      dr = Math.sqrt(dx * dx + dy * dy),
-      arrH  =  10 *Math.sqrt(d.value) + 0.5 * Math.sqrt(5),     //矢印の高さ
-      arc = (0.5 * Math.PI * dr) - (2 * arrH)     //弧の長さ （弧はlinkArcで定義）
-//      d.target.  　
-  return  "0 " + arrH + " " +  arc + " " + arrH
-}
+function calcLink(d){
 
+  return {source:pos1 ,target:pos2}
+}
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
