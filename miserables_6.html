@@ -37,13 +37,13 @@ var simulation = d3.forceSimulation()
 //使用するnode図形計上形状定義(中心座標は(0,0))
 var Defs = svg.append("defs")
 //Circle
-var icon1 = Defs.append('circle')
+var figCircle = Defs.append('circle')
       .attr("id","circle")
       .attr('r', 20),   //5⇒20
-    icon1len = icon1.node().getTotalLength(),
-    icon1str = icon1.node().getPointAtLength(0);
+    lenCircle = figCircle.node().getTotalLength(),
+    spCircle = figCircle.node().getPointAtLength(0);
 //Rect
-var icon2 = Defs.append('rect')
+var figRect = Defs.append('rect')
       .attr("id","rect")
       .attr('width', 40)
       .attr('height', 30)
@@ -51,37 +51,23 @@ var icon2 = Defs.append('rect')
       .attr('ry', 7)  //角を丸める
       .attr('x', -(40/2))  //circleと中心を合わせる
       .attr('y', -(30/2)),  //circleと中心を合わせる
-    icon2len = icon2.node().getTotalLength(),
-    icon2str = icon2.node().getPointAtLength(0);
+    lenRect = figRect.node().getTotalLength(),
+    spRect  = figRect.node().getPointAtLength(0);
 
 //Ellipse
-var icon3 = Defs.append('ellipse')
+var figEllipse = Defs.append('ellipse')
       .attr("id","ellipse")
       .attr('rx', 30)
       .attr('ry', 20),
-    icon3len = icon3.node().getTotalLength(),
-    icon3str = icon3.node().getPointAtLength(0);
+    lenEllipse = figEllipse.node().getTotalLength(),
+    spEllipse  = figEllipse.node().getPointAtLength(0);
 
-// hexagon
-var icon4 = Defs.append('polygon')
+// hexagon ※pointsは反時計回りで定義すると他の図形と記述の順番の整合が取れる
+var figHexagon = Defs.append('polygon')
       .attr("id","hexagon")
-      .attr('points', "0,20 17.3,10 17.3,-10 0,-20 -17.3,-10 -17.3,10"),
-    icon4len = icon4.node().getTotalLength(),
-    icon4str = icon4.node().getPointAtLength(0);
-
-//Debug用Memo領域
-//---------------------------------------
-var memo = svg.append('text')
-  .attr('text-anchor', 'left')
-  .attr("x",10)
-  .attr("y",30)
-  .attr('fill', 'black')
-  .attr('font-size', function(d) {return '15px'; }  )
-  .attr('font-weight', function(d) { return 'bold'; }  )
-  .text(function(d) {
-    return icon4len +"/ "+icon4str.x + ", " + icon4str.y;
-  })
-//---------------------------------------
+      .attr('points', "0,20 -17.3,10 -17.3,-10 0,-20 17.3,-10 17.3,10"),
+    lenHexagon = figHexagon.node().getTotalLength(),
+    spHexagon  = figHexagon.node().getPointAtLength(0);
 
 d3.json("miserables.json", function(error, graph) {
   if (error) throw error;
@@ -131,20 +117,19 @@ d3.json("miserables.json", function(error, graph) {
       .attr("viewBox", "0 0 20 20")
       .attr("markerWidth", 10)
       .attr("markerHeight", 10)
-      .attr("refX", 0)
+      .attr("refX", 19)
       .attr("refY", 10)
       .attr("orient", "auto-start-reverse")
 
   marker.append("path")
       .attr("d", "M0.5,0.75L18.88,10L0.5,19.25z")
-      .attr("fill","none")//"#ddd")          //背景色と同じ
+      .attr("fill","#ddd")          //背景色と同じ
       .attr("stroke-width", 1)
 
 //linkの定義
   var link = links.append("path")    //line⇒Path
 //      .attr("stroke","#999")  //輪郭線の色指定追加
       .attr("marker-start",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
-      .attr("marker-mid",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
       .attr("marker-end",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
       .attr("fill","none")    //塗りつぶしなしを追加
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); })
@@ -201,42 +186,6 @@ d3.json("miserables.json", function(error, graph) {
   simulation.force('positioningY')                      //Y方向の中心に向けた引力
       .strength(0.04)
 
-//破線判定
-  function stroke_dasharrayCD(d){
-      var arr = [2,4,6,7,9,10,11,12,0]
-      if (arr.indexOf(d.group) >= 0) {
-        return "3 2"  //3:2の破線
-      }
-      else {
-        return "none"  //破線なし
-      }
-  }
-
-//図形判定
-  function nodeTypeID(d){
-    var nodetype
-    var arrRect = [3,4]
-    var arrEllipse = [5,6,7]
-    var arrHexagon = [9,10,11,12,0]
-
-    if(arrRect.indexOf(d) >= 0){
-      //Rect
-      return "rect"
-    }
-    else if(arrEllipse.indexOf(d) >= 0){
-      //Ellipse
-      return "ellipse"
-    }
-    else if(arrHexagon.indexOf(d) >= 0){
-      //Hexagon
-      return "hexagon"
-    }
-    else{
-      //Circle
-      return "circle"
-    }
-  }
-
   function ticked() {
 
     link
@@ -255,16 +204,101 @@ d3.json("miserables.json", function(error, graph) {
   }
 });
 
+//破線判定
+function stroke_dasharrayCD(d){
+    var arr = [2,4,6,7,9,10,11,12,0]
+    if (arr.indexOf(d.group) >= 0) {
+      return "3 2"  //3:2の破線
+    }
+    else {
+      return "none"  //破線なし
+    }
+}
+
+//図形判定
+function nodeTypeID(d){
+  var arrRect = [3,4]
+  var arrEllipse = [5,6,7]
+  var arrHexagon = [9,10,11,12,0]
+
+  if(arrRect.indexOf(d) >= 0){
+    //Rect
+    return "rect"
+  }
+  else if(arrEllipse.indexOf(d) >= 0){
+    //Ellipse
+    return "ellipse"
+  }
+  else if(arrHexagon.indexOf(d) >= 0){
+    //Hexagon
+    return "hexagon"
+  }
+  else{
+    //Circle
+    return "circle"
+  }
+}
+
 function linkArc(d) {
   var dx = d.target.x - d.source.x,
       dy = d.target.y - d.source.y,
-      dr = Math.sqrt(dx * dx + dy * dy);
-  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+      dr = Math.sqrt(dx * dx + dy * dy),
+      srcPos = getIntersectionPos(d.source , d.target),
+      tgtPos = getIntersectionPos(d.target , d.source);
+      return "M" + srcPos.x + "," + srcPos.y + "A" + dr + "," + dr + " 0 0,1 " + tgtPos.x + "," + tgtPos.y;
 }
 
-function calcLink(d){
+//三点の座標から線の比率を返す
+function calcLoengthRate(pos1,pos2,pos3){
+  var v21 = {x:pos1.x - pos2.x , y:pos1.y - pos2.y},
+      v23 = {x:pos3.x - pos2.x , y:pos3.y - pos2.y},
+      x   =  v21.x * v23.x + v21.y * v23.y,    //v21・v23
+      y   =  v21.x * v23.y - v21.y * v23.x,    //v21×v23
+      theta = Math.atan2(y,x); //角度（radian）
+  if ( theta > 0){
+    return theta / (2 * Math.PI);
+  }
+  else {
+    return  1 + theta / (2 * Math.PI);
+  };
+}
 
-  return {source:pos1 ,target:pos2}
+//node図形とlinkの交点座標を取得(d1側の座標)
+function getIntersectionPos(d1,d2){
+  var nodeID = nodeTypeID(d1.group);
+  switch (nodeID) {
+    case "rect":
+      var pos1 = {x:d1.x + spRect.x , y:d1.y + spRect.y},
+          pos2 = {x:d1.x , y:d1.y},
+          pos3 = {x:d2.x , y:d2.y},
+          rate = calcLoengthRate(pos1,pos2,pos3),
+          dpos =  figRect.node().getPointAtLength(lenRect * rate);
+      return {x:d1.x + dpos.x, y:d1.y + dpos.y}
+      break;
+    case "ellipse":
+      var pos1 = {x:d1.x + spEllipse.x , y:d1.y + spEllipse.y},
+          pos2 = {x:d1.x , y:d1.y},
+          pos3 = {x:d2.x , y:d2.y},
+          rate = calcLoengthRate(pos1,pos2,pos3),
+          dpos =  figEllipse.node().getPointAtLength(lenEllipse * rate);
+      return {x:d1.x + dpos.x, y:d1.y + dpos.y}
+      break;
+    case "hexagon":
+      var pos1 = {x:d1.x + spHexagon.x , y:d1.y + spHexagon.y},
+          pos2 = {x:d1.x , y:d1.y},
+          pos3 = {x:d2.x , y:d2.y},
+          rate = calcLoengthRate(pos1,pos2,pos3),
+          dpos =  figHexagon.node().getPointAtLength(lenHexagon * rate);
+      return {x:d1.x + dpos.x, y:d1.y + dpos.y}
+      break;
+    default:
+      var pos1 = {x:d1.x + spCircle.x , y:d1.y + spCircle.y},
+          pos2 = {x:d1.x , y:d1.y},
+          pos3 = {x:d2.x , y:d2.y},
+          rate = calcLoengthRate(pos1,pos2,pos3),
+          dpos =  figCircle.node().getPointAtLength(lenCircle * rate);
+      return {x:d1.x + dpos.x, y:d1.y + dpos.y}
+  }
 }
 
 function dragstarted(d) {

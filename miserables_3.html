@@ -34,32 +34,34 @@ var simulation = d3.forceSimulation()
     .force('positioningY',d3.forceY())                                        //詳細設定は後で
     .force('center', d3.forceCenter(width / 2, height / 2));                  //重力の中心
 
-//使用するnode図形計上形状定義
-var Defs = svg.append("defs")
+//使用するnode図形形状定義(中心座標は(0,0))
+var Defs = svg.append("defs");
+
 //Circle
-Defs.append('circle')
-    .attr("id","circle")
-    .attr('r', 20)   //5⇒20
+var figCircle = Defs.append('circle')
+      .attr("id","circle")
+      .attr('r', 20);   //5⇒20
+
 //Rect
-Defs.append('rect')
-  .attr("id","rect")
-  .attr('width', 40)
-  .attr('height', 30)
-  .attr('rx', 7)  //角を丸める
-  .attr('ry', 7)  //角を丸める
-  .attr('x', -(40/2))  //circleと中心を合わせる
-  .attr('y', -(30/2))  //circleと中心を合わせる
+var figRect = Defs.append('rect')
+      .attr("id","rect")
+      .attr('width', 40)
+      .attr('height', 30)
+      .attr('rx', 7)  //角を丸める
+      .attr('ry', 7)  //角を丸める
+      .attr('x', -(40/2))  //circleと中心を合わせる
+      .attr('y', -(30/2));  //circleと中心を合わせる
 
 //Ellipse
-Defs.append('ellipse')
-  .attr("id","ellipse")
-  .attr('rx', 30)
-  .attr('ry', 20)
+var figEllipse = Defs.append('ellipse')
+      .attr("id","ellipse")
+      .attr('rx', 30)
+      .attr('ry', 20);
 
-// hexagon
-Defs.append('polygon')
-    .attr("id","hexagon")
-    .attr('points', "0,20 17.3,10 17.3,-10 0,-20 -17.3,-10 -17.3,10")
+// hexagon ※pointsは反時計回りで定義すると他の図形と記述の順番の整合が取れる
+var figHexagon = Defs.append('polygon')
+      .attr("id","hexagon")
+      .attr('points', "0,20 -17.3,10 -17.3,-10 0,-20 17.3,-10 17.3,10");
 
 d3.json("miserables.json", function(error, graph) {
   if (error) throw error;
@@ -153,42 +155,6 @@ function SVGdragged(d) {
   simulation.force('positioningY')                      //Y方向の中心に向けた引力
       .strength(0.04)
 
-//破線判定
-  function stroke_dasharrayCD(d){
-      var arr = [2,4,6,7,9,10,11,12,0]
-      if (arr.indexOf(d.group) >= 0) {
-        return "3 2"  //3:2の破線
-      }
-      else {
-        return "none"  //破線なし
-      }
-  }
-
-  //図形判定
-    function nodeTypeID(d){
-      var nodetype
-      var arrRect = [3,4]
-      var arrEllipse = [5,6,7]
-      var arrHexagon = [9,10,11,12,0]
-
-      if(arrRect.indexOf(d) >= 0){
-        //Rect
-        return "rect"
-      }
-      else if(arrEllipse.indexOf(d) >= 0){
-        //Ellipse
-        return "ellipse"
-      }
-      else if(arrHexagon.indexOf(d) >= 0){
-        //Hexagon
-        return "hexagon"
-      }
-      else{
-        //Circle
-        return "circle"
-      }
-    }
-
   function ticked() {
     link
         .attr("x1", function(d) { return d.source.x; })
@@ -203,7 +169,41 @@ function SVGdragged(d) {
   }
 });
 
+//破線判定
+function stroke_dasharrayCD(d){
+    var arr = [2,4,6,7,9,10,11,12,0]
+    if (arr.indexOf(d.group) >= 0) {
+      return "3 2"  //3:2の破線
+    }
+    else {
+      return "none"  //破線なし
+    }
+}
 
+//図形判定
+  function nodeTypeID(d){
+    var nodetype
+    var arrRect = [3,4]
+    var arrEllipse = [5,6,7]
+    var arrHexagon = [9,10,11,12,0]
+
+    if(arrRect.indexOf(d) >= 0){
+      //Rect
+      return "rect"
+    }
+    else if(arrEllipse.indexOf(d) >= 0){
+      //Ellipse
+      return "ellipse"
+    }
+    else if(arrHexagon.indexOf(d) >= 0){
+      //Hexagon
+      return "hexagon"
+    }
+    else{
+      //Circle
+      return "circle"
+    }
+  }
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
