@@ -174,7 +174,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
       .attr('y',-40)
 
   node.append("title")
-      .text(function(d) { return d.id; });
+      .text(function(d) { return d.memo; });
 
   simulation
       .nodes(graph.nodes)
