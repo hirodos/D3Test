@@ -100,12 +100,11 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
       .attr("class", "linkArrow")
       .attr("fill", "#999")
       .attr("stroke","#999")  //輪郭線の色指定追加
-      .on('mouseover', function(){d3.select(this).attr('stroke', 'red')
-                                  d3.select(this).attr('fill', 'red')
-                                  ;}) //カーソルが合ったら赤に
-      .on('mouseout', function(){d3.select(this).attr('stroke', "#999")
-                                 d3.select(this).attr('fill', "#999")
-                                  ;}) //カーソルが外れたら元の色に
+      .on('mouseover', function(){
+            d3.select(this).attr('stroke', 'red'); //カーソルが合ったら赤に
+          })
+      .on('mouseout', function(){d3.select(this).attr('stroke', "#999"); //カーソルが外れたら元の色に
+          })
       .call(d3.drag()　              //無いとエラーになる。。
           .on('start', dragstarted)
           .on('drag', dragged)
@@ -113,7 +112,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
 
 //Markerの定義
   var marker = links.append("marker")
-      .attr("id", function(d) { return "mkr" + d.source+d.target })
+      .attr("id", function(d) { return "mkr" + d.index })
       .attr("viewBox", "0 0 20 20")
       .attr("markerWidth", 10)
       .attr("markerHeight", 10)
@@ -129,8 +128,8 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
 //linkの定義
   var link = links.append("path")    //line⇒Path
 //      .attr("stroke","#999")  //輪郭線の色指定追加
-      .attr("marker-start",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
-      .attr("marker-end",function(d) { return "url(#mkr" + d.source+d.target  + ")"})
+      .attr("marker-start",function(d) { return "url(#mkr" +  d.index  + ")"})
+      .attr("marker-end",function(d) { return "url(#mkr" + d.index  + ")"})
       .attr("fill","none")    //塗りつぶしなしを追加
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); })
       .attr("stroke-dashoffset", 0)
@@ -168,7 +167,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
 
   //node imageの定義
     node.append('image')
-      .attr('xlink:href', function(d) {if (d.image != null ) { return d.image } else {return  "image/unknown.png" }})
+      .attr('xlink:href', function(d) {if (typeof d.image === "undefined") {return  "image/unknown.png" } else { return d.image }})
       .attr('width',30)
       .attr('x',-15)
       .attr('y',-40)

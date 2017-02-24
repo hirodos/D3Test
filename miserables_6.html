@@ -100,12 +100,11 @@ d3.json("miserables.json", function(error, graph) {
       .attr("class", "linkArrow")
       .attr("fill", "#999")
       .attr("stroke","#999")  //輪郭線の色指定追加
-      .on('mouseover', function(){d3.select(this).attr('stroke', 'red')
-                                  d3.select(this).attr('fill', 'red')
-                                  ;}) //カーソルが合ったら赤に
-      .on('mouseout', function(){d3.select(this).attr('stroke', "#999")
-                                 d3.select(this).attr('fill', "#999")
-                                  ;}) //カーソルが外れたら元の色に
+      .on('mouseover', function(){
+            d3.select(this).attr('stroke', 'red'); //カーソルが合ったら赤に
+          })
+      .on('mouseout', function(){d3.select(this).attr('stroke', "#999"); //カーソルが外れたら元の色に
+          })
       .call(d3.drag()　              //無いとエラーになる。。
           .on('start', dragstarted)
           .on('drag', dragged)
