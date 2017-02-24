@@ -3,32 +3,32 @@
 <style>
 /*そのうちCSSに移動*/
 #datatip{
-	padding: 10px 20px;
-	font-family: Verdana, arial;
-	width: 240px;
-	height: auto;
-	position: absolute;
-	border: 1px solid black;
-	background-color: white;
-	border-radius: 5px;
-	opacity: 0.0;
-	left: 0;
-	top: 0;
-	background-position: 10px 7px, 220px 7px;
-	background-size: 50px auto, 50px auto;
-	background-repeat: no-repeat , no-repeat;
+  padding: 10px 20px;
+  font-family: Verdana, arial;
+  width: 240px;
+  height: auto;
+  position: absolute;
+  border: 1px solid black;
+  background-color: white;
+  border-radius: 5px;
+  opacity: 0.0;
+  left: 0;
+  top: 0;
+  background-position: 10px 7px, 220px 7px;
+  background-size: 50px auto, 50px auto;
+  background-repeat: no-repeat , no-repeat;
 }
 
 #datatip h2 {
-	font-size: 18px;
-	padding-bottom: 5px;
+  font-size: 18px;
+  padding-bottom: 5px;
   padding-left: 5px;
-	margin-left: 50px;
+  margin-left: 50px;
 
  }
 
 #datatip p {
-	font-size: 14px;
+  font-size: 14px;
  }
 /*
 .links line {
@@ -46,8 +46,8 @@
 <svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 
 <div id="datatip">
-	<h2></h2>
-	<p></p>
+  <h2></h2>
+  <p></p>
 </div>
 
 
@@ -138,46 +138,46 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
       .attr("fill", "#999")
       .attr("stroke","#999")  //輪郭線の色指定追加
       .on('mouseover', function(d){
-						d3.select(this).attr('stroke', 'red'); //カーソルが合ったら赤に
-						datatip.style("left", d3.event.pageX + 20 + "px")
-	                  .style("top", d3.event.pageY + 20 + "px")
-	                  .style("z-index", 0)
-	                  .style("opacity", 1)
-										.style('background-image',function(){
-											if (typeof d.source.image === "undefined" ){
-												if (typeof d.target.image === "undefined" ){
-													return  'url("image/unknown.png"), url("image/unknown.png")'
-												}
-												else {
-													return  'url("image/unknown.png"), ' + 'url("'+ d.target.image + '")'
-												}
-											}
-											else {
-												if (typeof d.target.image === "undefined" ){
-													return 'url("'+ d.source.image + '"), ' + 'url("image/unknown.png")'
-												}
-												else {
-													return 'url("'+ d.source.image + '"), url("'+ d.target.image + '")'
-												}
-											}
-										});
+            d3.select(this).attr('stroke', 'red'); //カーソルが合ったら赤に
+            datatip.style("left", d3.event.pageX + 20 + "px")
+                    .style("top", d3.event.pageY + 20 + "px")
+                    .style("z-index", 0)
+                    .style("opacity", 1)
+                    .style('background-image',function(){
+                      if (typeof d.source.image === "undefined" ){
+                        if (typeof d.target.image === "undefined" ){
+                          return  'url("image/unknown.png"), url("image/unknown.png")'
+                        }
+                        else {
+                          return  'url("image/unknown.png"), ' + 'url("'+ d.target.image + '")'
+                        }
+                      }
+                      else {
+                        if (typeof d.target.image === "undefined" ){
+                          return 'url("'+ d.source.image + '"), ' + 'url("image/unknown.png")'
+                        }
+                        else {
+                          return 'url("'+ d.source.image + '"), url("'+ d.target.image + '")'
+                        }
+                      }
+                    });
 
-	          datatip.select("h2")
-	                  .style("border-bottom", "2px solid " +color(d.source.group))
-										.style("margin-right", "50px")
-	                  .text("value:" + d.value);
+            datatip.select("h2")
+                    .style("border-bottom", "2px solid " +color(d.source.group))
+                    .style("margin-right", "50px")
+                    .text("value:" + d.value);
 
-	          datatip.select("p")
-	                  .text(d.source.id + " to " + d.target.id);
+            datatip.select("p")
+                    .text(d.source.id + " to " + d.target.id);
         })
-			.on('mousemove', function(){
-	          datatip.style("left", d3.event.pageX + 20 + "px")
-	                  .style("top", d3.event.pageY + 20 + "px")
-				 })
+      .on('mousemove', function(){
+            datatip.style("left", d3.event.pageX + 20 + "px")
+                    .style("top", d3.event.pageY + 20 + "px")
+         })
       .on('mouseout', function(){
-						d3.select(this).attr('stroke', "#999"); //カーソルが外れたら元の色に
-						datatip.style("z-index", -1)
-	                 .style("opacity", 0)
+            d3.select(this).attr('stroke', "#999"); //カーソルが外れたら元の色に
+            datatip.style("z-index", -1)
+                   .style("opacity", 0)
         })
       .call(d3.drag()　              //無いとエラーになる。。
           .on('start', dragstarted)
@@ -228,18 +228,18 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .style('stroke-width', '2')  //線の太さ
     .style('stroke-dasharray',function(d) {return stroke_dasharrayCD(d)})  //破線判定
     .on('mouseover', function(d){
-					d3.select(this).attr('fill', 'red'); //カーソルが合ったら赤に
+          d3.select(this).attr('fill', 'red'); //カーソルが合ったら赤に
 
-		      datatip.style("left", d3.event.pageX + 20 + "px")
+          datatip.style("left", d3.event.pageX + 20 + "px")
                   .style("top", d3.event.pageY + 20 + "px")
                   .style("z-index", 0)
                   .style("opacity", 1)
-									.style('background-image', function() {if (typeof d.image === "undefined" ) {return  'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
+                  .style('background-image', function() {if (typeof d.image === "undefined" ) {return  'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
 
 
           datatip.select("h2")
                   .style("border-bottom", "2px solid " +color(d.group))
-									.style("margin-right", "0px")
+                  .style("margin-right", "0px")
                   .text(d.id);
 
           datatip.select("p")
@@ -252,7 +252,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .on('mouseout', function(){
           d3.select(this).attr('fill', function(d) { return color(d.group); })  //カーソルが外れたら元の色に
 
-		      datatip.style("z-index", -1)
+          datatip.style("z-index", -1)
                  .style("opacity", 0)
       })
 
