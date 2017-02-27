@@ -39,7 +39,7 @@
   padding: 5px 10px;
   font-family: Verdana, arial;
   width: auto;
-  height: 100px;
+  height: 140px;
   border: 1px solid black;
   background-color: white;
   border-radius: 5px;
@@ -123,10 +123,14 @@
     <h2>Setting</h2>
     <input id="slider" type="range" min="25" max="400" value="100" step="10">
     Zoom: <span id="n_segments_text">100</span>
+    <br><br>
+    グループ指定: <input id="number" type="number" min="0" max="12" value="" step="1">
+    <input type="submit" value="set" class="btn_set">
+
   </section>
   <section id= "side_search">
     <h2>Search</h2>
-      <input type="text" name="example" class="textBox"><input type="submit" value="検索" class="btn">
+      <input type="text" name="example" class="textBox"><input type="submit" value="検索" class="btn_search">
   </section>
   <section id= "side_data">
     <h2>Data</h2>
