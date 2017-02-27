@@ -44,9 +44,20 @@
 
 <svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 
+<!-- カーソルを合わせたときに表示する情報領域-->
 <div id="datatip">
   <h2></h2>
   <p></p>
+</div>
+
+
+<!-- コントロール-->
+<div class="controls">
+<input id="slider" type="range" min="25" max="400" value="100" step="10">
+Zoom: <span id="n_segments_text">100</span>
+
+<input class="checkbox" type="checkbox" id="cbox" value="checkbox">
+<span class="checkbox">Show segments</span>
 </div>
 
 
@@ -214,6 +225,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .data(graph.nodes)
     .enter()
     .append('g')
+//    .on("click",)
     .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
