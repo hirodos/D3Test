@@ -29,6 +29,75 @@
 #datatip p {
   font-size: 14px;
 }
+
+#sidebar {
+  width: 250px;
+  float: left;
+}
+
+#side_setting{
+  padding: 5px 10px;
+  font-family: Verdana, arial;
+  width: auto;
+  height: 100px;
+  border: 1px solid black;
+  background-color: white;
+  border-radius: 5px;
+  left: 0;
+  top: 0;
+}
+
+#side_setting h2{
+  font-size: 18px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid gray
+}
+
+#side_search{
+  padding: 5px 10px;
+  font-family: Verdana, arial;
+  width: auto;
+  height: 100px;
+  border: 1px solid black;
+  background-color: white;
+  border-radius: 5px;
+  left: 0;
+  top: 0;
+}
+
+#side_search h2{
+  font-size: 18px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid gray
+}
+
+#side_data{
+  padding: 5px 10px;
+  font-family: Verdana, arial;
+  width: auto;
+  height: 540px;
+  border: 1px solid black;
+  background-color: white;
+  border-radius: 5px;
+  background-position: 160px 7px;
+  background-size: 70px auto;
+  background-repeat: no-repeat;
+  left: 0;
+  top: 0;
+  opacity: 0.0;
+}
+
+#side_data h2{
+  font-size: 18px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid gray;
+  margin-right: 100px;
+}
+
+#side_data h3 {
+  font-size: 14px;
+}
+
 /*
 .links line {
   stroke: #999;
@@ -41,7 +110,6 @@
 }
 */
 </style>
-
 <svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 
 <!-- カーソルを合わせたときに表示する情報領域-->
@@ -50,19 +118,28 @@
   <p></p>
 </div>
 
-
-<!-- コントロール-->
-<div class="controls">
-<input id="slider" type="range" min="25" max="400" value="100" step="10">
-Zoom: <span id="n_segments_text">100</span>
-
-<input class="checkbox" type="checkbox" id="cbox" value="checkbox">
-<span class="checkbox">Show segments</span>
+<div id="sidebar">
+  <section id= "side_setting">
+    <h2>Setting</h2>
+    <input id="slider" type="range" min="25" max="400" value="100" step="10">
+    Zoom: <span id="n_segments_text">100</span>
+  </section>
+  <section id= "side_search">
+    <h2>Search</h2>
+      <input type="text" name="example" class="textBox"><input type="submit" value="検索" class="btn">
+  </section>
+  <section id= "side_data">
+    <h2>Data</h2>
+    <h3></h3>
+<!--		<p style="font-size:10px; overflow:scroll; height:100; padding:5px; "></p> -->
+  <iframe id="data_memo" seamless height=440 width=220 sandbox="allow-same-origin"></iframe>
+  </section>
 </div>
-
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
+var sidedata = d3.select("#side_data");
+
 //カーソルを合わせたときに表示する情報領域
 var datatip = d3.select("#datatip");
 
@@ -253,7 +330,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
                   .style("margin-right", "0px")
                   .text(d.id);
 
-          datatip.select("p")
+          datatip.select("sandbox")
                   .text("グループID:" + d.group );
       })
     .on('mousemove', function(){
@@ -266,7 +343,17 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
           datatip.style("z-index", -1)
                  .style("opacity", 0)
       })
+      .on('click', function(d){
+        sidedata.style("z-index", 0)
+                .style("opacity", 1)
+                .style('background-image', function() {if (typeof d.image === "undefined" ) {return 'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
 
+        sidedata.select("h3")
+                .text(d.id)
+
+        sidedata.select("#data_memo")
+                .attr("srcdoc","<p>" +d.memo.replace(/\n/g,"<br>") +"</p>" )
+        })
 //node textの定義
   node.append('text')
     .attr('text-anchor', 'middle')
