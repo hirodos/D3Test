@@ -110,7 +110,7 @@
 }
 */
 </style>
-<svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
+<svg width="980" height="810" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 
 <!-- カーソルを合わせたときに表示する情報領域-->
 <div id="datatip">
@@ -135,8 +135,8 @@
   <section id= "side_data">
     <h2>Data</h2>
     <h3></h3>
-<!--		<p style="font-size:10px; overflow:scroll; height:100; padding:5px; "></p> -->
-  <iframe id="data_memo" seamless height=440 width=220 sandbox="allow-same-origin"></iframe>
+    <iframe id="data_memo" seamless height=300 width=220 sandbox="allow-same-origin"></iframe>
+    <iframe id="data_relation" seamless height=140 width=220 sandbox="allow-same-origin"></iframe>
   </section>
 </div>
 
@@ -356,7 +356,28 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
                 .text(d.id)
 
         sidedata.select("#data_memo")
-                .attr("srcdoc","<p>" +d.memo.replace(/\n/g,"<br>") +"</p>" )
+                .attr("srcdoc",function(){
+                  if (typeof d.memo === "undefined" ){
+                    return "<p style='font-size: 11px'></p>"
+                  }
+                  else {
+                    return "<p style='font-size: 11px'>" +d.memo.replace(/\n/g,"<br>") +"</p>"
+                  }
+                })
+
+        sidedata.select("#data_relation")
+                .attr("srcdoc",function(){
+                  var r_value ="",
+                      r_target =graph.links.filter(function(item,index){if(item.source.id == d.id ) return true}),
+                      r_source =graph.links.filter(function(item,index){if(item.target.id == d.id ) return true});
+                  for (var key in r_target) {
+                    r_value = r_value +　"to: " + r_target[key].target.id + "<br>"
+                  }
+                  for (var key in r_source) {
+                    r_value = r_value + "from: " + r_source[key].source.id + "<br>"
+                  }
+                  return "<p style='font-size: 11px'>" + r_value +"</p>"
+                })
         })
 //node textの定義
   node.append('text')
