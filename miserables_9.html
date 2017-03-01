@@ -118,20 +118,24 @@
   <p></p>
 </div>
 
+<!-- サイドバー設定-->
 <div id="sidebar">
+
   <section id= "side_setting">
     <h2>Setting</h2>
-    <input id="slider" type="range" min="25" max="400" value="100" step="10">
+    <input id="rng_zoom" type="range" min="25" max="400" value="100" step="10">
     Zoom: <span id="n_segments_text">100</span>
     <br><br>
-    グループ指定: <input id="number" type="number" min="0" max="12" value="" step="1">
-    <input type="submit" value="set" class="btn_set">
-
+    グループ指定: <input id="num_group" type="number" min="0" max="12" value="" step="1">
+    <input type="submit" value="set" id="btn_num">
   </section>
+
   <section id= "side_search">
     <h2>Search</h2>
-      <input type="text" name="example" class="textBox"><input type="submit" value="検索" class="btn_search">
+    <input type="text" name="group_id" id="txt_search">
+    <input type="submit" value="検索" id="btn_search">
   </section>
+
   <section id= "side_data">
     <h2>Data</h2>
     <h3></h3>
@@ -270,7 +274,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
             datatip.style("z-index", -1)
                    .style("opacity", 0)
         })
-      .call(d3.drag()　              //無いとエラーになる。。
+      .call(d3.drag()             //無いとエラーになる。。
           .on('start', dragstarted)
           .on('drag', dragged)
           .on('end', dragended));
@@ -306,7 +310,6 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .data(graph.nodes)
     .enter()
     .append('g')
-//    .on("click",)
     .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
@@ -334,7 +337,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
                   .style("margin-right", "0px")
                   .text(d.id);
 
-          datatip.select("sandbox")
+          datatip.select("p")
                   .text("グループID:" + d.group );
       })
     .on('mousemove', function(){
@@ -347,7 +350,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
           datatip.style("z-index", -1)
                  .style("opacity", 0)
       })
-      .on('click', function(d){
+    .on('click', function(d){
         sidedata.style("z-index", 0)
                 .style("opacity", 1)
                 .style('background-image', function() {if (typeof d.image === "undefined" ) {return 'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
@@ -371,7 +374,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
                       r_target =graph.links.filter(function(item,index){if(item.source.id == d.id ) return true}),
                       r_source =graph.links.filter(function(item,index){if(item.target.id == d.id ) return true});
                   for (var key in r_target) {
-                    r_value = r_value +　"to: " + r_target[key].target.id + "<br>"
+                    r_value = r_value + "to: " + r_target[key].target.id + "<br>"
                   }
                   for (var key in r_source) {
                     r_value = r_value + "from: " + r_source[key].source.id + "<br>"
