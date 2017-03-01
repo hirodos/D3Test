@@ -310,6 +310,38 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .data(graph.nodes)
     .enter()
     .append('g')
+    .on('mousedown', function(d){
+        sidedata.style("z-index", 0)
+                .style("opacity", 1)
+                .style('background-image', function() {if (typeof d.image === "undefined" ) {return 'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
+
+        sidedata.select("h3")
+                .text(d.id)
+
+        sidedata.select("#data_memo")
+                .attr("srcdoc",function(){
+                  if (typeof d.memo === "undefined" ){
+                    return "<p style='font-size: 11px'></p>"
+                  }
+                  else {
+                    return "<p style='font-size: 11px'>" +d.memo.replace(/\n/g,"<br>") +"</p>"
+                  }
+                })
+
+        sidedata.select("#data_relation")
+                .attr("srcdoc",function(){
+                  var r_value ="",
+                      r_target =graph.links.filter(function(item,index){if(item.source.id == d.id ) return true}),
+                      r_source =graph.links.filter(function(item,index){if(item.target.id == d.id ) return true});
+                  for (var key in r_target) {
+                    r_value = r_value + "to: " + r_target[key].target.id + "<br>"
+                  }
+                  for (var key in r_source) {
+                    r_value = r_value + "from: " + r_source[key].source.id + "<br>"
+                  }
+                  return "<p style='font-size: 11px'>" + r_value +"</p>"
+                })
+        })
     .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
@@ -350,38 +382,6 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
           datatip.style("z-index", -1)
                  .style("opacity", 0)
       })
-    .on('click', function(d){
-        sidedata.style("z-index", 0)
-                .style("opacity", 1)
-                .style('background-image', function() {if (typeof d.image === "undefined" ) {return 'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
-
-        sidedata.select("h3")
-                .text(d.id)
-
-        sidedata.select("#data_memo")
-                .attr("srcdoc",function(){
-                  if (typeof d.memo === "undefined" ){
-                    return "<p style='font-size: 11px'></p>"
-                  }
-                  else {
-                    return "<p style='font-size: 11px'>" +d.memo.replace(/\n/g,"<br>") +"</p>"
-                  }
-                })
-
-        sidedata.select("#data_relation")
-                .attr("srcdoc",function(){
-                  var r_value ="",
-                      r_target =graph.links.filter(function(item,index){if(item.source.id == d.id ) return true}),
-                      r_source =graph.links.filter(function(item,index){if(item.target.id == d.id ) return true});
-                  for (var key in r_target) {
-                    r_value = r_value + "to: " + r_target[key].target.id + "<br>"
-                  }
-                  for (var key in r_source) {
-                    r_value = r_value + "from: " + r_source[key].source.id + "<br>"
-                  }
-                  return "<p style='font-size: 11px'>" + r_value +"</p>"
-                })
-        })
 //node textの定義
   node.append('text')
     .attr('text-anchor', 'middle')
