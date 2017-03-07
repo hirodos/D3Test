@@ -24,8 +24,7 @@
   padding-bottom: 5px;
   padding-left: 5px;
   margin-left: 50px;
-
- }
+}
 
 #datatip p {
   font-size: 14px;
@@ -45,6 +44,7 @@
 
 <svg width="1024" height="768" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 
+<!-- カーソルを合わせたときに表示する情報領域-->
 <div id="datatip">
   <h2></h2>
   <p></p>
@@ -53,7 +53,7 @@
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
-//カーソルを合わせたときに表示する情報領域
+
 var datatip = d3.select("#datatip");
 
 var svg = d3.select("svg"),
@@ -106,26 +106,28 @@ var figHexagon = Defs.append('polygon')
     lenHexagon = figHexagon.node().getTotalLength(),
     spHexagon  = figHexagon.node().getPointAtLength(0);
 
-d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変更
-  if (error) throw error;
-
 //"svg"にZoomイベントを設定
-  svg.call(d3.zoom()
-      .scaleExtent([1/4,4])
-      .on('zoom', SVGzoomed));
+var zoom = d3.zoom()
+  .scaleExtent([1/4,4])
+  .on('zoom', SVGzoomed);
+
+svg.call(zoom);
 
 //"svg"上に"g"をappendしてdragイベントを設定
-  var g = svg.append("g")
-      .call(d3.drag()
-      .on('drag',SVGdragged))
+var g = svg.append("g")
+  .call(d3.drag()
+  .on('drag',SVGdragged))
 
-  function SVGzoomed() {
-    g.attr("transform", d3.event.transform);
-  }
+function SVGzoomed() {
+  g.attr("transform", d3.event.transform);
+}
 
-  function SVGdragged(d) {
-      d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
-        };
+function SVGdragged(d) {
+  d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
+    };
+
+d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変更
+  if (error) throw error;
 
 //Linksの定義
   var links = g.append("g")  //svg⇒gに

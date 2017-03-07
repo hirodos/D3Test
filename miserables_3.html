@@ -63,26 +63,28 @@ var figHexagon = Defs.append('polygon')
       .attr("id","hexagon")
       .attr('points', "0,20 -17.3,10 -17.3,-10 0,-20 17.3,-10 17.3,10");
 
-d3.json("miserables.json", function(error, graph) {
-  if (error) throw error;
-
 //"svg"にZoomイベントを設定
-svg.call(d3.zoom()
-    .scaleExtent([1/4,4])
-    .on('zoom', SVGzoomed));
+var zoom = d3.zoom()
+  .scaleExtent([1/4,4])
+  .on('zoom', SVGzoomed);
+
+svg.call(zoom);
 
 //"svg"上に"g"をappendしてdragイベントを設定
 var g = svg.append("g")
-    .call(d3.drag()
-    .on('drag',SVGdragged))
+  .call(d3.drag()
+  .on('drag',SVGdragged))
 
 function SVGzoomed() {
   g.attr("transform", d3.event.transform);
 }
 
 function SVGdragged(d) {
-    d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
-      };
+  d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
+    };
+
+d3.json("miserables.json", function(error, graph) {
+  if (error) throw error;
 
   var link = g.append("g")  //svg⇒gに
       .attr("class", "links")

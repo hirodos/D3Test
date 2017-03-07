@@ -110,6 +110,7 @@
 }
 */
 </style>
+
 <svg width="980" height="810" style="background-color:#ddd"></svg>    <!-- ちょっと広くして色つけた-->
 
 <!-- カーソルを合わせたときに表示する情報領域-->
@@ -203,26 +204,34 @@ var figHexagon = Defs.append('polygon')
     lenHexagon = figHexagon.node().getTotalLength(),
     spHexagon  = figHexagon.node().getPointAtLength(0);
 
+//"svg"にZoomイベントを設定
+var zoom = d3.zoom()
+  .scaleExtent([1/4,4])
+  .on('zoom', SVGzoomed);
+
+svg.call(zoom);
+
+//"svg"上に"g"をappendしてdragイベントを設定
+var g = svg.append("g")
+  .call(d3.drag()
+  .on('drag',SVGdragged))
+
+function SVGzoomed() {
+  g.attr("transform", d3.event.transform);
+}
+
+function SVGdragged(d) {
+  d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
+    };
+
+//Jsonfileのデータを保持
+var jsondata;
+
 d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変更
   if (error) throw error;
 
-//"svg"にZoomイベントを設定
-  svg.call(d3.zoom()
-      .scaleExtent([1/4,4])
-      .on('zoom', SVGzoomed));
-
-//"svg"上に"g"をappendしてdragイベントを設定
-  var g = svg.append("g")
-      .call(d3.drag()
-      .on('drag',SVGdragged))
-
-  function SVGzoomed() {
-    g.attr("transform", d3.event.transform);
-  }
-
-  function SVGdragged(d) {
-      d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
-        };
+//jsondataに値を格納
+ jsondata = graph;
 
 //Linksの定義
   var links = g.append("g")  //svg⇒gに
@@ -312,38 +321,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .data(graph.nodes)
     .enter()
     .append('g')
-    .on('mousedown', function(d){
-        sidedata.style("z-index", 0)
-                .style("opacity", 1)
-                .style('background-image', function() {if (typeof d.image === "undefined" ) {return 'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
-
-        sidedata.select("h3")
-                .text(d.id)
-
-        sidedata.select("#data_memo")
-                .attr("srcdoc",function(){
-                  if (typeof d.memo === "undefined" ){
-                    return "<p style='font-size: 11px'></p>"
-                  }
-                  else {
-                    return "<p style='font-size: 11px'>" +d.memo.replace(/\n/g,"<br>") +"</p>"
-                  }
-                })
-
-        sidedata.select("#data_relation")
-                .attr("srcdoc",function(){
-                  var r_value ="",
-                      r_target =graph.links.filter(function(item,index){if(item.source.id == d.id ) return true}),
-                      r_source =graph.links.filter(function(item,index){if(item.target.id == d.id ) return true});
-                  for (var key in r_target) {
-                    r_value = r_value + "to: " + r_target[key].target.id + "<br>"
-                  }
-                  for (var key in r_source) {
-                    r_value = r_value + "from: " + r_source[key].source.id + "<br>"
-                  }
-                  return "<p style='font-size: 11px'>" + r_value +"</p>"
-                })
-        })
+    .on('mousedown', set_sidedata)  //情報をsidebarに表示するためのmousedownイベント
     .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
@@ -364,7 +342,6 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
                   .style("z-index", 0)
                   .style("opacity", 1)
                   .style('background-image', function() {if (typeof d.image === "undefined" ) {return 'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
-
 
           datatip.select("h2")
                   .style("border-bottom", "2px solid " +color(d.group))
@@ -438,6 +415,44 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
         .attr('transform', function(d) {return 'translate(' + d.x + ',' + d.y + ')'}) //nodesの要素が連動して動くように設定
   }
 });
+
+//Sidedataに情報をセット
+function set_sidedata(d){
+//画像表示
+  sidedata.style("z-index", 0)
+          .style("opacity", 1)
+          .style('background-image', function() {if (typeof d.image === "undefined" ) {return 'url("image/unknown.png")' } else { return 'url("'+ d.image + '")'}})
+
+//node名表示
+  sidedata.select("h3")
+          .text(d.id)
+
+//nodeのメモ表示
+  sidedata.select("#data_memo")
+          .attr("srcdoc",function(){
+            if (typeof d.memo === "undefined" ){
+              return "<p style='font-size: 11px'></p>"
+            }
+            else {
+              return "<p style='font-size: 11px'>" +d.memo.replace(/\n/g,"<br>") +"</p>"
+            }
+          })
+
+//nodeにつながるLink表示
+  sidedata.select("#data_relation")
+          .attr("srcdoc",function(){
+            var r_value ="",
+                r_target =jsondata.links.filter(function(item,index){if(item.source.id == d.id ) return true}),
+                r_source =jsondata.links.filter(function(item,index){if(item.target.id == d.id ) return true});
+            for (var key in r_target) {
+              r_value = r_value + "to: " + r_target[key].target.id + "<br>"
+            }
+            for (var key in r_source) {
+              r_value = r_value + "from: " + r_source[key].source.id + "<br>"
+            }
+            return "<p style='font-size: 11px'>" + r_value +"</p>"
+          })
+  }
 
 //破線判定
 function stroke_dasharrayCD(d){
