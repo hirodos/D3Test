@@ -123,13 +123,13 @@
 
   <section id= "side_setting">
     <h2>Setting</h2>
-    <input id="rng_zoom" type="range" min="-2" max="2" value="0" step="0.1">
+    <input id="rng_zoom" type="range" min="-2" max="2" value="0" step="0.1" oninput="InputZoom();">
     Zoom: <span id="r_zoom_text">100</span>
-    <input id="rng_link" type="range" min="0" max="31" value="0" step="1">
+    <input id="rng_link" type="range" min="0" max="31" value="0" step="1" oninput="UpodateNodeLink();">
     Link: <span id="r_link_text">0</span>
     <br>
     Group  : <input id="num_group" type="number" min="0" max="12" value="" step="1">
-    <input type="submit" value="set" id="btn_group">
+    <input type="submit" value="set" id="btn_group" onclick="UpodateNodeLink();">
   </section>
 
   <section id= "side_search">
@@ -217,6 +217,8 @@ var g = svg.append("g")
 
 function SVGzoomed() {
   g.attr("transform", d3.event.transform);
+  d3.select("#rng_zoom").attr("value",Math.log2(d3.event.transform.k).toFixed(1))
+  d3.select("#r_zoom_text").text((d3.event.transform.k*100).toFixed(0));  //スライダーの横にある表示を更新
 }
 
 function SVGdragged(d) {
@@ -229,7 +231,7 @@ var jsondata;
 d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変更
   if (error) throw error;
 
-//jsondataに値を格納
+//jsondataに値を格納.
  jsondata = graph;
 
 //Linksの定義
@@ -239,7 +241,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .data(graph.links)
     .enter()
     .append("g")
-      .attr("class", "linkArrow")
+      .attr("id", "linkArrow")  //外から使用するため、classでは無くidに
       .attr("fill", "#999")
       .attr("stroke","#999")  //輪郭線の色指定追加
       .on('mouseover', function(d){
@@ -320,6 +322,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
     .data(graph.nodes)
     .enter()
     .append('g')
+      .attr('id', 'nodefigure')
     .on('mousedown', set_sidedata)
     .call(d3.drag()
         .on('start', dragstarted)
@@ -398,6 +401,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
       .strength(0.04)
 
   function ticked() {
+//    links.attr("visibility",function(d){if(d.value >= document.getElementById("rng_link").value){return "visible"} else {return "hidden"}})
 
     link
         .attr("d", linkArc)
@@ -453,6 +457,13 @@ function set_sidedata(d){
           })
   }
 
+function InputZoom(){
+  var zoom_val = document.getElementById("rng_zoom").value;
+  svg.transition()
+    .duration(200)
+    .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(Math.pow(2,zoom_val)));
+}
+
 function OnClickSearch(){
   var search_val = document.getElementById("txt_search").value
   if (search_val == ""){
@@ -471,7 +482,6 @@ function OnClickSearch(){
         .call(zoom.transform, transform(search_data));
     //sidedataにデータを表示
       set_sidedata(search_data);
-
     }
   }
 }
@@ -481,6 +491,33 @@ function transform(d) {
       .translate(width / 2, height / 2)     //一旦中央に
       .scale(4)                             //とりあえず4倍でZoomIn
       .translate(-d.x, -d.y);               //指定nodeの座標
+}
+
+function UpodateNodeLink(){
+  var linkvalue = document.getElementById("rng_link").value;
+  var nodegroup = document.getElementById("num_group").value;
+
+  d3.select("#r_link_text").text(linkvalue);  //スライダーの横にある表示を更新
+
+  if (nodegroup == ""){
+  //node.group指定がnullのとき
+    //全node表示
+    d3.selectAll("#nodefigure").attr("display","inline");
+
+    //Linkは画面設定に従う
+    var linkvalue = document.getElementById("rng_link").value;
+    d3.selectAll("#linkArrow").attr("visibility",function(d){
+      if(d.value >= linkvalue){return "visible"} else {return "hidden"}})  //各矢印の表示設定を更新
+  }
+  else {
+  //node.group指定がnull以外のとき
+    //各nodeの表示設定
+    d3.selectAll("#nodefigure").attr("display",function(d){
+      if(d.group == nodegroup){return "inline"} else {return "none"}})
+    //nodeの表示設定とLinkの表示設定に従うLinkの表示設定
+    d3.selectAll("#linkArrow").attr("visibility",function(d){
+      if((d.source.group == nodegroup)&&(d.target.group == nodegroup)&&(d.value >= linkvalue)){return "visible"} else {return "hidden"}})  //各矢印の表示設定を更新
+  }
 }
 
 //破線判定
