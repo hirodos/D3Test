@@ -207,23 +207,19 @@ var figHexagon = Defs.append('polygon')
 var zoom = d3.zoom()
   .scaleExtent([1/4,4])
   .on('zoom', SVGzoomed);
-
 svg.call(zoom);
 
-//"svg"上に"g"をappendしてdragイベントを設定
+//"svg"上に"g"をappend
 var g = svg.append("g")
-  .call(d3.drag()
-  .on('drag',SVGdragged))
 
 function SVGzoomed() {
   g.attr("transform", d3.event.transform);
-  d3.select("#rng_zoom").attr("value",Math.log2(d3.event.transform.k).toFixed(1))
-  d3.select("#r_zoom_text").text((d3.event.transform.k*100).toFixed(0));  //スライダーの横にある表示を更新
+  console.log(d3.event.transform);
+//倍率表示
+  d3.select("#r_zoom_text")
+    .text((d3.event.transform.k*100).toFixed(0));  //スライダーの横にある表示を更新
+  document.getElementById('rng_zoom').value=Math.log2(d3.event.transform.k).toFixed(1)
 }
-
-function SVGdragged(d) {
-  d3.select(this).attr('cx', d.x = d3.event.x).attr('cy', d.y = d3.event.y);
-    };
 
 //Jsonfileのデータを保持
 var jsondata;
@@ -351,7 +347,7 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
                   .text(d.id);
 
           datatip.select("p")
-                  .text("グループID:" + d.group );
+                  .text("グループID:" + d.group);
       })
     .on('mousemove', function(){
           datatip.style("left", d3.event.pageX + 20 + "px")
@@ -401,7 +397,6 @@ d3.json("miserables2.json", function(error, graph) {  //miserables2.jsonに変�
       .strength(0.04)
 
   function ticked() {
-//    links.attr("visibility",function(d){if(d.value >= document.getElementById("rng_link").value){return "visible"} else {return "hidden"}})
 
     link
         .attr("d", linkArc)
@@ -458,10 +453,44 @@ function set_sidedata(d){
   }
 
 function InputZoom(){
-  var zoom_val = document.getElementById("rng_zoom").value;
+//Zoom前の初期値を取得
+  if (g.attr("transform") == null){
+    var trnsf = "translate(0,0) scale(1)"
+  }
+  else {
+    var trnsf = g.attr("transform")
+  }
+  var pre_pos_str = trnsf.split('(')[1].split(')')[0],
+      pre_pos = {x: +pre_pos_str.split(',')[0], y: +pre_pos_str.split(',')[1]},    //Zoom前座標
+      pre_k   = trnsf.split('(')[2].split(')')[0],             //Zoom前Scale
+      pre_c   = {x:+(1-pre_k)*width/2 ,y:+(1-pre_k)*height/2},    //Zoom前画面センター座標
+      d_pos = {x:(+pre_c.x-pre_pos.x)*(1-pre_k) ,y:(+pre_c.y-pre_pos.y)*(1-pre_k) };   //Panで移動した座標
+
+
+  console.log("pre_pos_str:",pre_pos_str);
+  console.log("pre_pos:",JSON.stringify(pre_pos));
+  console.log("pre_k:",pre_k);
+  console.log("pre_c:",JSON.stringify(pre_c));
+  console.log("d_pos:",JSON.stringify(d_pos));
+
+  var zoom_scale = Math.pow(2,document.getElementById("rng_zoom").value),  //sliderで指定した倍率
+  g_c = {x:width/2 , y:height/2},                                        //画面センター（svg座標系）
+//  zoom_c = {x:0,y :0},      //Zoom後の画面センター座標
+  pos = {x:-g_c.x-d_pos.x, y:-g_c.y-d_pos.y}
+
+  console.log("zoom_scale:",zoom_scale);
+  console.log("svg_c:",JSON.stringify(g_c));
+  console.log("pos:",JSON.stringify(pos));
+
   svg.transition()
-    .duration(200)
-    .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(Math.pow(2,zoom_val)));
+    .call(zoom.transform, transform);
+
+  function transform() {
+    return d3.zoomIdentity
+        .translate(width / 2,height / 2)
+        .scale(zoom_scale)
+        .translate(-g_c.x, -g_c.y)               //指定nodeの座標
+  }
 }
 
 function OnClickSearch(){
@@ -479,19 +508,20 @@ function OnClickSearch(){
 　  //対象先にズームイン
       svg.transition()
         .duration(750)
-        .call(zoom.transform, transform(search_data));
+        .call(zoom.transform, transform);
     //sidedataにデータを表示
       set_sidedata(search_data);
+
+      function transform() {
+        return d3.zoomIdentity
+            .translate(width / 2, height / 2)
+            .scale(4)                             //とりあえず4倍でZoomIn
+            .translate(-search_data.x, -search_data.y)               //指定nodeの座標
+      }
     }
   }
 }
 
-function transform(d) {
-  return d3.zoomIdentity
-      .translate(width / 2, height / 2)     //一旦中央に
-      .scale(4)                             //とりあえず4倍でZoomIn
-      .translate(-d.x, -d.y);               //指定nodeの座標
-}
 
 function UpodateNodeLink(){
   var linkvalue = document.getElementById("rng_link").value;
